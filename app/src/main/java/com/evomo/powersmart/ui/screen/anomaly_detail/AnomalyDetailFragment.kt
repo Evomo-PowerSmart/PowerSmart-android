@@ -21,8 +21,7 @@ import com.evomo.powersmart.ui.theme.commonTopAppBarColor
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class
-    : Fragment() {
+class AnomalyDetailFragment : Fragment() {
 
     private var _binding: FragmentAnomalyDetailBinding? = null
     private val binding get() = _binding!!
