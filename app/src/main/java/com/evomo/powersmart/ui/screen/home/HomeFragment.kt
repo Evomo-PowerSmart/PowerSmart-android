@@ -83,7 +83,7 @@ class HomeFragment : Fragment() {
                                 TopAppBar(
                                     colors = commonTopAppBarColor(),
                                     title = {
-                                        Text(text = "Power Smart")
+                                        Text(text = "PowerSmart")
                                     },
                                     actions = {
                                         Row(
@@ -117,11 +117,7 @@ class HomeFragment : Fragment() {
                                         text = "Realtime Monitoring",
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                                     )
-                                    IconButton(onClick = {
-                                        Navigation.findNavController(view).navigate(
-                                            HomeFragmentDirections.actionHomeFragmentToMonitoringDetailFragment()
-                                        )
-                                    }) {
+                                    IconButton(onClick = {}) {
                                         Icon(
                                             imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                                             contentDescription = null
