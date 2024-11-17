@@ -66,17 +66,6 @@ class AnomalyDetailFragment : Fragment() {
             }
         }
 
-        binding.tvReadingTime.text = "data"
-        binding.tvMeterSerialNumber.text = "data"
-        binding.tvMeterType.text = "data"
-        binding.tvDataType.text = "data"
-        binding.tvActiveEnergyImport.text = "data"
-        binding.tvActiveEnergyExport.text = "data"
-        binding.tvReactiveEnergyImport.text = "data"
-        binding.tvReactiveEnergyExport.text = "data"
-        binding.tvApparentEnergyImport.text = "data"
-        binding.tvApparentEnergyExport.text = "data"
-
         // TODO: Implement the rest of the fragment
     }
 

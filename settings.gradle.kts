@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Power Smart"
+rootProject.name = "PowerSmart"
 include(":app")
