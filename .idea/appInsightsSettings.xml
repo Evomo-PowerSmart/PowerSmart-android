@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.evomo.powersmart" />
-                  <option name="mobileSdkAppId" value="1:231554691134:android:e66ea0349a30ff6fbce16f" />
-                  <option name="projectId" value="evomo-powersmart" />
-                  <option name="projectNumber" value="231554691134" />
+                  <option name="mobileSdkAppId" value="1:366471157245:android:85906519e3c2204f3fb594" />
+                  <option name="projectId" value="auth-login-f60fe" />
+                  <option name="projectNumber" value="366471157245" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

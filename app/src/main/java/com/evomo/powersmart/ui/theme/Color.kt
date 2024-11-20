@@ -2,6 +2,13 @@ package com.evomo.powersmart.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+// Custom
+val goodColorLight = Color(0xFF159957)
+val warningColorLight = Color(0xFFffd700)
+
+val goodColorDark = Color(0xFF0a4c13)
+val warningColorDark = Color(0xFF7f6b00)
+
 val primaryLight = Color(0xFF006876)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFFA0EFFF)
