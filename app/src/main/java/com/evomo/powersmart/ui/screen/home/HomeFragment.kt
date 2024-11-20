@@ -20,11 +20,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -42,6 +46,7 @@ import com.evomo.powersmart.ui.theme.commonTopAppBarColor
 import com.evomo.powersmart.ui.theme.spacing
 import com.google.firebase.Timestamp
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import java.util.UUID
 
 @AndroidEntryPoint
@@ -72,13 +77,23 @@ class HomeFragment : Fragment() {
                 PowerSmartTheme {
                     Surface {
                         val state by viewModel.state.collectAsState()
-                        val activeEnergyImport by viewModel.activeEnergyImport.collectAsState()
-                        val status by viewModel.status.collectAsState()
-                        val lastUpdateTime by viewModel.lastUpdateTime.collectAsState()
-                        val addedEnergy by viewModel.addedEnergy.collectAsState()
+//                        val activeEnergyImport by viewModel.activeEnergyImport.collectAsState()
+//                        val status by viewModel.status.collectAsState()
+//                        val energyIn by viewModel.energyIn.collectAsState()
+//                        val lastUpdateTime by viewModel.lastUpdateTime.collectAsState()
+//                        val addedEnergy by viewModel.addedEnergy.collectAsState()
+
+                        val snackbarHomeState = remember { SnackbarHostState() }
+
+                        LaunchedEffect(key1 = true) {
+                            viewModel.messageFlow.collectLatest { message ->
+                                snackbarHomeState.showSnackbar(message)
+                            }
+                        }
 
                         Scaffold(
                             modifier = Modifier.fillMaxSize(),
+                            snackbarHost = { SnackbarHost(hostState = snackbarHomeState) },
                             topBar = {
                                 TopAppBar(
                                     colors = commonTopAppBarColor(),
@@ -132,12 +147,13 @@ class HomeFragment : Fragment() {
                                 Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
                                 RealtimeBox(
                                     location = "Lantai 2",
-                                    lastUpdated = lastUpdateTime,
+                                    lastUpdated = state.lastUpdateTime ?: "No data available yet",
                                     unitDetail = "Daya Per Hour",
-                                    value = activeEnergyImport / 1000.0,
+                                    value = state.activeEnergyImport / 1000.0,
                                     unit = "kWh",
-                                    status = status ?: Status.STABLE,
-                                    addedValue = addedEnergy,
+                                    status = state.status,
+                                    energyIn = state.energyIn,
+                                    addedValue = state.addedEnergy,
                                     previousValueUnit = "Wh"
                                 )
 
