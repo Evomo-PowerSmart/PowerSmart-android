@@ -3,6 +3,7 @@ package com.evomo.powersmart.ui.screen.home.components
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,9 +32,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.evomo.powersmart.ui.screen.home.EnergyIn
 import com.evomo.powersmart.ui.screen.home.Status
 import com.evomo.powersmart.ui.theme.PowerSmartTheme
+import com.evomo.powersmart.ui.theme.goodColorDark
+import com.evomo.powersmart.ui.theme.goodColorLight
 import com.evomo.powersmart.ui.theme.spacing
+import com.evomo.powersmart.ui.theme.warningColorDark
+import com.evomo.powersmart.ui.theme.warningColorLight
 
 @Composable
 fun RealtimeBox(
@@ -43,9 +49,10 @@ fun RealtimeBox(
     unitDetail: String,
     value: Double,
     status: Status,
+    energyIn: EnergyIn,
     unit: String,
     addedValue: Double,
-    previousValueUnit: String = unit
+    previousValueUnit: String = unit,
 ) {
     OutlinedCard(
         shape = RoundedCornerShape(12.dp),
@@ -60,8 +67,10 @@ fun RealtimeBox(
                     .height(MaterialTheme.spacing.medium)
                     .background(
                         when (status) {
-                            Status.DECREASING -> MaterialTheme.colorScheme.error
-                            else -> MaterialTheme.colorScheme.primary
+                            Status.GOOD -> if (isSystemInDarkTheme()) goodColorDark else goodColorLight
+                            Status.DANGER -> MaterialTheme.colorScheme.error
+                            Status.WARNING -> if (isSystemInDarkTheme()) warningColorDark else warningColorLight
+                            Status.OFFLINE -> MaterialTheme.colorScheme.outline
                         }
                     )
             )
@@ -127,15 +136,15 @@ fun RealtimeBox(
                 ) {
                     Icon(
                         modifier = Modifier.size(24.dp),
-                        imageVector = when (status) {
-                            Status.INCREASING -> Icons.Outlined.ArrowCircleUp
-                            Status.DECREASING -> Icons.Outlined.ArrowCircleDown
-                            else -> Icons.Outlined.ArrowCircleRight
+                        imageVector = when (energyIn) {
+                            EnergyIn.INCREASE -> Icons.Outlined.ArrowCircleUp
+                            EnergyIn.DECREASE -> Icons.Outlined.ArrowCircleDown
+                            EnergyIn.NO_CHANGE -> Icons.Outlined.ArrowCircleRight
                         },
-                        tint = when (status) {
-                            Status.INCREASING -> MaterialTheme.colorScheme.primary
-                            Status.DECREASING -> MaterialTheme.colorScheme.error
-                            else -> MaterialTheme.colorScheme.tertiary
+                        tint = when (energyIn) {
+                            EnergyIn.DECREASE -> MaterialTheme.colorScheme.primary
+                            EnergyIn.INCREASE -> MaterialTheme.colorScheme.error
+                            EnergyIn.NO_CHANGE -> MaterialTheme.colorScheme.tertiary
                         },
                         contentDescription = null
                     )
@@ -175,7 +184,8 @@ private fun RealtimeBoxPreview() {
                 unitDetail = "Daya Semu per Hour",
                 value = 258.01,
                 unit = "VAh",
-                status = Status.DECREASING,
+                status = Status.GOOD,
+                energyIn = EnergyIn.DECREASE,
                 addedValue = 254.0
             )
         }
