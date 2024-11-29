@@ -1,12 +1,19 @@
 package com.evomo.powersmart.ui.screen.monitoring_detail
 
+import android.annotation.SuppressLint
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Arrangement
+import android.widget.TextView
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -14,44 +21,44 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.Navigation
+import com.evomo.powersmart.R
 import com.evomo.powersmart.databinding.FragmentMonitoringDetailBinding
 import com.evomo.powersmart.ui.screen.monitoring_detail.components.FilterDateChip
 import com.evomo.powersmart.ui.theme.PowerSmartTheme
 import com.evomo.powersmart.ui.theme.commonTopAppBarColor
 import com.evomo.powersmart.ui.theme.spacing
-import com.evomo.powersmart.ui.utils.toDateString
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
-import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
-import com.patrykandpatrick.vico.core.common.component.TextComponent
-import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.evomo.powersmart.ui.utils.formatToTwoDecimal
+import com.evomo.powersmart.ui.utils.getStringDateFromEpochMilli
+import com.evomo.powersmart.ui.utils.getTimeStringFromTimeInMillis
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.MarkerView
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.utils.MPPointF
+import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 @AndroidEntryPoint
@@ -74,6 +81,23 @@ class MonitoringDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val location = MonitoringDetailFragmentArgs.fromBundle(requireArguments()).location
+
+        if (savedInstanceState == null) {
+            viewModel.fetchHistoricalData(
+                location = location.location,
+                startDate = viewModel.state.value.startDate,
+                endDate = viewModel.state.value.endDate,
+                startTime = viewModel.state.value.startTime,
+                endTime = viewModel.state.value.endTime
+            )
+        }
+
+        viewModel.usageData.observe(viewLifecycleOwner) { usages ->
+            binding.lineChart.clear()
+            updateLineChart(binding.lineChart, usages)
+        }
+
         binding.cvMonitoringDetail.apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -81,101 +105,62 @@ class MonitoringDetailFragment : Fragment() {
             setContent {
                 PowerSmartTheme {
                     Surface {
-                        val usageData by viewModel.filteredUsageData.collectAsState()
-                        val startDate by viewModel.startDate.collectAsState()
-                        val endDate by viewModel.endDate.collectAsState()
+                        val state by viewModel.state.collectAsStateWithLifecycle()
 
-                        // Define a key to store mapping between x-values and LocalDate values
-                        val xToDateMapKey = ExtraStore.Key<Map<Float, LocalDate>>()
-
-                        // Create data mapping for chart
-                        val data = usageData.associate {
-                            val date = Instant.ofEpochMilli(it.timestampMillis)
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDate()
-                            date to it.usage.toFloat()
-                        }
-
-                        // Map x-values (floats) to LocalDates for proportional date spacing
-                        val xToDates = data.keys.associateBy { it.toEpochDay().toFloat() }
-
-                        val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
-                        val chart = rememberCartesianChart(
-                            rememberLineCartesianLayer(),
-                            startAxis = VerticalAxis.rememberStart(),
-                            bottomAxis = HorizontalAxis.rememberBottom(
-//                                valueFormatter = { context, x, _ ->
-//                                    val dateMap = context.model.extraStore[xToDateMapKey]
-//                                    val date =
-//                                        dateMap[x.toFloat()] ?: LocalDate.ofEpochDay(x.toLong())
-//                                    date.format(dateTimeFormatter)
-//                                }
-                            ),
-                            marker = rememberDefaultCartesianMarker(
-                                label = TextComponent(),
-                            ),
-                        )
-                        val modelProducer = remember { CartesianChartModelProducer() }
-
-                        // Set up the chart model
-                        LaunchedEffect(key1 = usageData) {
-                            modelProducer.runTransaction {
-                                lineSeries {
-                                    series(xToDates.keys, data.values)
-                                }
-                                extras { it[xToDateMapKey] = xToDates }
-                            }
-                        }
-
-                        val scrollState = rememberVicoScrollState()
-                        val zoomState = rememberVicoZoomState()
-
-                        Scaffold(
-                            modifier = Modifier.fillMaxSize(),
-                            topBar = {
-                                TopAppBar(
-                                    colors = commonTopAppBarColor(),
-                                    title = {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            TopAppBar(
+                                colors = commonTopAppBarColor(),
+                                title = {
+                                    Column {
                                         Text(text = "Monitoring Detail")
-                                    },
-                                    navigationIcon = {
-                                        IconButton(onClick = {
-                                            Navigation.findNavController(binding.root)
-                                                .popBackStack()
-                                        }) {
-                                            Icon(
-                                                imageVector = Icons.Default.ArrowBackIosNew,
-                                                contentDescription = null
-                                            )
-                                        }
+                                        Text(
+                                            modifier = Modifier.alpha(0.75f),
+                                            text = location.display,
+                                            style = MaterialTheme.typography.titleSmall,
+                                        )
                                     }
-                                )
-                            }
-                        ) { innerPadding ->
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(innerPadding)
-                                    .padding(
-                                        MaterialTheme.spacing.medium
-                                    ),
-                                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-                            ) {
-                                FilterDateChip(
-                                    startDateValue = if (startDate == 0L) null else startDate.toDateString(),
-                                    endDateValue = if (endDate == 0L) null else endDate.toDateString(),
-                                    onStartDateValueChange = viewModel::updateStartDate,
-                                    onEndDateValueChange = viewModel::updateEndDate,
-                                )
-                                OutlinedCard {
-                                    CartesianChartHost(
-                                        chart = chart,
-                                        modelProducer = modelProducer,
-                                        scrollState = scrollState,
-                                        zoomState = zoomState,
+                                },
+                                navigationIcon = {
+                                    IconButton(onClick = {
+                                        Navigation.findNavController(binding.root)
+                                            .popBackStack()
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowBackIosNew,
+                                            contentDescription = null
+                                        )
+                                    }
+                                }
+                            )
+
+                            Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
+                            FilterDateChip(
+                                modifier = Modifier.padding(horizontal = MaterialTheme.spacing.medium),
+                                startDateValue = getStringDateFromEpochMilli(state.startDate),
+                                endDateValue = getStringDateFromEpochMilli(state.endDate),
+                                startTimeValue = getTimeStringFromTimeInMillis(state.startTime),
+                                endTimeValue = getTimeStringFromTimeInMillis(state.endTime),
+                                onStartDateValueChange = viewModel::updateStartDate,
+                                onEndDateValueChange = viewModel::updateEndDate,
+                                onStartTimeValueChange = viewModel::updateStartTime,
+                                onEndTimeValueChange = viewModel::updateEndTime,
+                                onApplyClick = {
+                                    viewModel.fetchHistoricalData(
+                                        location = location.location,
+                                        startDate = state.startDate,
+                                        endDate = state.endDate,
+                                        startTime = state.startTime,
+                                        endTime = state.endTime
                                     )
                                 }
+                            )
+                        }
+
+                        LaunchedEffect(key1 = true) {
+                            viewModel.errorMessage.collectLatest { message ->
+                                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
@@ -187,5 +172,185 @@ class MonitoringDetailFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun updateLineChart(lineChart: LineChart, usageDatas: List<UsageData>) {
+        val entries = usageDatas.map { data ->
+            Entry(
+                data.readingTime.toEpochSecond(ZoneOffset.UTC).toFloat(),
+                data.activeEnergyImport.toFloat()
+            )
+        }
+
+        val primaryColor = MaterialColors.getColor(
+            requireContext(),
+            com.google.android.material.R.attr.colorPrimary,
+            Color.BLACK
+        )
+        val onSurfaceColor = MaterialColors.getColor(
+            requireContext(),
+            com.google.android.material.R.attr.colorOnSurface,
+            Color.BLACK
+        )
+
+        val dataSet = LineDataSet(entries, "Active Energy Import").apply {
+            color = primaryColor
+            valueTextColor = onSurfaceColor
+            lineWidth = 2f
+            setDrawCircles(true)
+            setDrawCircleHole(false)
+            setCircleColor(primaryColor)
+            setDrawValues(false)
+            mode = LineDataSet.Mode.HORIZONTAL_BEZIER
+        }
+
+        val lineData = LineData(dataSet)
+
+        lineChart.apply {
+            data = lineData
+            description.text = "Energy Usage Over Time"
+            description.textColor = onSurfaceColor
+
+            axisRight.isEnabled = false
+
+            axisLeft.apply {
+                setDrawGridLines(true)
+                textColor = onSurfaceColor
+            }
+
+            legend.apply {
+                isEnabled = true
+                textSize = 12f
+                textColor = onSurfaceColor
+                verticalAlignment = Legend.LegendVerticalAlignment.TOP
+                horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
+                orientation = Legend.LegendOrientation.HORIZONTAL
+                setDrawInside(false)
+            }
+
+            setXAxisRenderer(
+                CustomXAxisRenderer(
+                    viewPortHandler,
+                    xAxis,
+                    getTransformer(YAxis.AxisDependency.LEFT)
+                )
+            )
+
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                setDrawGridLines(false)
+                setLabelCount(5, false)
+                valueFormatter = DateValueFormatter()
+                textColor = onSurfaceColor
+            }
+
+            setExtraOffsets(0f, 20f, 0f, 20f)
+
+            marker = object : MarkerView(context, R.layout.marker_custom) {
+                private val tvContent: TextView = findViewById(R.id.title_tv)
+                private val tvTime: TextView = findViewById(R.id.time_tv)
+
+                @SuppressLint("SetTextI18n")
+                override fun refreshContent(entry: Entry?, highlight: Highlight?) {
+                    entry?.let {
+                        tvContent.text = "${(entry.y / 1000.0).formatToTwoDecimal()} kWh"
+
+                        val localDateTime = Instant.ofEpochSecond(entry.x.toLong())
+                            .atZone(ZoneOffset.UTC)
+                            .toLocalDateTime()
+
+                        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
+                        tvTime.text = localDateTime.format(formatter)
+                    }
+                    super.refreshContent(entry, highlight)
+                }
+
+                private val arrowSize = 35
+                private val arrowCircleOffset = 0f
+
+                override fun getOffsetForDrawingAtPoint(posX: Float, posY: Float): MPPointF {
+                    val offset = offset
+                    val width = width.toFloat()
+                    val height = height.toFloat()
+
+                    if (posY <= height + arrowSize) {
+                        offset.y = arrowSize.toFloat()
+                    } else {
+                        offset.y = -height - arrowSize
+                    }
+
+                    if (posX > this@apply.width - width) {
+                        offset.x = -width
+                    } else {
+                        offset.x = 0f
+                        if (posX > width / 2) {
+                            offset.x = -(width / 2)
+                        }
+                    }
+
+                    return offset
+                }
+
+                override fun draw(canvas: Canvas, posX: Float, posY: Float) {
+                    val paint = Paint().apply {
+                        style = Paint.Style.FILL
+                        strokeJoin = Paint.Join.ROUND
+                        color = ContextCompat.getColor(context, R.color.md_theme_secondaryContainer)
+                    }
+
+                    val width = width.toFloat()
+                    val height = height.toFloat()
+                    val offset = getOffsetForDrawingAtPoint(posX, posY)
+                    val saveId: Int = canvas.save()
+                    val path = Path()
+
+                    if (posY < height + arrowSize) {
+                        if (posX > this@apply.width - width) {
+                            path.moveTo(width - (2 * arrowSize), 2f)
+                            path.lineTo(width, -arrowSize + arrowCircleOffset)
+                            path.lineTo(width - arrowSize, 2f)
+                        } else {
+                            if (posX > width / 2) {
+                                path.moveTo(width / 2 - arrowSize / 2, 2f)
+                                path.lineTo(width / 2, -arrowSize + arrowCircleOffset)
+                                path.lineTo(width / 2 + arrowSize / 2, 2f)
+                            } else {
+                                path.moveTo(0f, -arrowSize + arrowCircleOffset)
+                                path.lineTo(0f + arrowSize, 2f)
+                                path.lineTo(0f, 2f)
+                                path.lineTo(0f, -arrowSize + arrowCircleOffset)
+                            }
+                        }
+                        path.offset(posX + offset.x, posY + offset.y)
+                    } else {
+                        if (posX > this@apply.width - width) {
+                            path.moveTo(width, (height - 2) + arrowSize - arrowCircleOffset)
+                            path.lineTo(width - arrowSize, height - 2)
+                            path.lineTo(width - (2 * arrowSize), height - 2)
+                        } else {
+                            if (posX > width / 2) {
+                                path.moveTo(width / 2 + arrowSize / 2, height - 2)
+                                path.lineTo(width / 2, (height - 2) + arrowSize - arrowCircleOffset)
+                                path.lineTo(width / 2 - arrowSize / 2, height - 2)
+                                path.lineTo(0f, height - 2)
+                            } else {
+                                path.moveTo(0f + (arrowSize * 2), height - 2)
+                                path.lineTo(0f + arrowSize, (height - 2) + arrowSize - arrowCircleOffset)
+                                path.lineTo(0f + arrowSize, height - 2)
+                            }
+                        }
+                        path.offset(posX + offset.x, posY + offset.y)
+                    }
+
+                    canvas.drawPath(path, paint)
+                    canvas.translate(posX + offset.x, posY + offset.y)
+                    draw(canvas)
+                    canvas.restoreToCount(saveId)
+                }
+            }
+
+            invalidate()
+        }
     }
 }

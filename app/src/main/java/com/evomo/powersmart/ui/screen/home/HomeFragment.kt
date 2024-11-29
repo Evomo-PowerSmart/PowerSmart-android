@@ -1,9 +1,14 @@
 package com.evomo.powersmart.ui.screen.home
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,10 +39,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import com.evomo.powersmart.databinding.FragmentHomeBinding
+import com.evomo.powersmart.ui.components.LargeDropdownMenu
 import com.evomo.powersmart.ui.screen.home.components.NotificationItem
 import com.evomo.powersmart.ui.screen.home.components.RealtimeBox
 import com.evomo.powersmart.ui.screen.home.components.SmallProfileIcon
@@ -45,8 +53,12 @@ import com.evomo.powersmart.ui.theme.PowerSmartTheme
 import com.evomo.powersmart.ui.theme.commonTopAppBarColor
 import com.evomo.powersmart.ui.theme.spacing
 import com.google.firebase.Timestamp
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.tasks.await
+import timber.log.Timber
 import java.util.UUID
 
 @AndroidEntryPoint
@@ -56,6 +68,21 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: HomeViewModel by viewModels()
+
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission granted
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Notifications permission denied!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -69,6 +96,20 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                // FCM SDK (and your app) can post notifications.
+            } else {
+                // Directly ask for the permission
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
         binding.cvHome.apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -77,11 +118,6 @@ class HomeFragment : Fragment() {
                 PowerSmartTheme {
                     Surface {
                         val state by viewModel.state.collectAsState()
-//                        val activeEnergyImport by viewModel.activeEnergyImport.collectAsState()
-//                        val status by viewModel.status.collectAsState()
-//                        val energyIn by viewModel.energyIn.collectAsState()
-//                        val lastUpdateTime by viewModel.lastUpdateTime.collectAsState()
-//                        val addedEnergy by viewModel.addedEnergy.collectAsState()
 
                         val snackbarHomeState = remember { SnackbarHostState() }
 
@@ -89,6 +125,11 @@ class HomeFragment : Fragment() {
                             viewModel.messageFlow.collectLatest { message ->
                                 snackbarHomeState.showSnackbar(message)
                             }
+                        }
+
+                        LaunchedEffect(key1 = Unit) {
+                            val fcmToken = Firebase.messaging.token.await()
+                            Timber.i("fcm token: $fcmToken")
                         }
 
                         Scaffold(
@@ -132,21 +173,24 @@ class HomeFragment : Fragment() {
                                         text = "Realtime Monitoring",
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                                     )
-                                    IconButton(onClick = {
-                                        Navigation.findNavController(view).navigate(
-                                            HomeFragmentDirections.actionHomeFragmentToMonitoringDetailFragment()
-                                        )
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                                            contentDescription = null
-                                        )
-                                    }
                                 }
 
+
                                 Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+                                LargeDropdownMenu(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    label = "Location",
+                                    items = Location.entries.map { it.display },
+                                    selectedIndex = state.selectedLocationIndex,
+                                    onItemSelected = { index, _ ->
+                                        viewModel.updateSelectedLocationAndIndex(index)
+                                    },
+                                )
+
+                                Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
                                 RealtimeBox(
-                                    location = "Lantai 2",
+                                    isLoading = state.isRealtimeDataLoading,
+                                    location = state.selectedLocation.display,
                                     lastUpdated = state.lastUpdateTime ?: "No data available yet",
                                     unitDetail = "Daya Per Hour",
                                     value = state.activeEnergyImport / 1000.0,
@@ -154,7 +198,13 @@ class HomeFragment : Fragment() {
                                     status = state.status,
                                     energyIn = state.energyIn,
                                     addedValue = state.addedEnergy,
-                                    previousValueUnit = "Wh"
+                                    previousValueUnit = "Wh",
+                                    onClick = {
+                                        val toMonitoringDetailFragment =
+                                            HomeFragmentDirections.actionHomeFragmentToMonitoringDetailFragment()
+                                        toMonitoringDetailFragment.location = state.selectedLocation
+                                        findNavController().navigate(toMonitoringDetailFragment)
+                                    }
                                 )
 
                                 Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
@@ -178,29 +228,6 @@ class HomeFragment : Fragment() {
                                 }
 
                                 Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
-//                                Column(
-//                                    modifier = Modifier
-//                                        .fillMaxWidth()
-//                                        .weight(1f),
-//                                    horizontalAlignment = Alignment.CenterHorizontally,
-//                                    verticalArrangement = Arrangement.Center
-//                                ) {
-//                                    Icon(
-//                                        modifier = Modifier
-//                                            .size(72.dp)
-//                                            .alpha(0.7f),
-//                                        imageVector = Icons.Outlined.WorkHistory,
-//                                        contentDescription = null
-//                                    )
-//                                    Spacer(modifier = Modifier.size(8.dp))
-//                                    Text(
-//                                        modifier = Modifier.alpha(0.7f),
-//                                        text = "No new notification!",
-//                                        fontSize = 16.sp,
-//                                        textAlign = TextAlign.Center
-//                                    )
-//                                }
-
                                 LazyColumn(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally,
