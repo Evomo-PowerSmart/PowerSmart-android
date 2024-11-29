@@ -50,6 +50,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import com.evomo.powersmart.R
+import com.evomo.powersmart.data.Resource
 import com.evomo.powersmart.databinding.FragmentLoginBinding
 import com.evomo.powersmart.ui.components.CommonButton
 import com.evomo.powersmart.ui.components.CommonOutlinedButton
@@ -120,8 +121,14 @@ class LoginFragment : Fragment() {
                                 onLoginClick = viewModel::onLoginClicked,
                                 onContinueWithGoogleClick = {
                                     lifecycleScope.launch {
-                                        getGoogleIdToken(requireContext())?.let {
-                                            viewModel.onContinueWithGoogle(it)
+                                        when (val response = getGoogleIdToken(requireContext())) {
+                                            is Resource.Error -> snackbarHostState.showSnackbar(
+                                                message = response.message ?: "Something went wrong!"
+                                            )
+                                            is Resource.Loading -> {}
+                                            is Resource.Success -> response.data?.let {
+                                                viewModel.onContinueWithGoogle(it)
+                                            }
                                         }
                                     }
                                 },

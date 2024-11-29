@@ -7,13 +7,14 @@ import androidx.credentials.exceptions.CreateCredentialCancellationException
 import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.evomo.powersmart.BuildConfig
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.evomo.powersmart.data.Resource
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import timber.log.Timber
 import java.security.MessageDigest
 import java.util.UUID
 
-suspend fun getGoogleIdToken(context: Context): String? {
+suspend fun getGoogleIdToken(context: Context): Resource<String> {
     try {
         val credentialManager = CredentialManager.create(context)
 
@@ -23,14 +24,21 @@ suspend fun getGoogleIdToken(context: Context): String? {
         val digest = md.digest(bytes)
         val hashedNonce = digest.fold("") { str, it -> str + "%02x".format(it) }
 
-        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(BuildConfig.WEB_CLIENT_ID)
-            .setNonce(hashedNonce)
-            .build()
+        // Idk why this is not working
+//        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
+//            .setFilterByAuthorizedAccounts(false)
+//            .setServerClientId(BuildConfig.WEB_CLIENT_ID)
+//            .setNonce(hashedNonce)
+//            .build()
+
+        val signInWithGoogleOption: GetSignInWithGoogleOption =
+            GetSignInWithGoogleOption.Builder(BuildConfig.WEB_CLIENT_ID)
+                .setNonce(hashedNonce)
+                .build()
 
         val request: GetCredentialRequest = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
+//            .addCredentialOption(googleIdOption)
+            .addCredentialOption(signInWithGoogleOption)
             .build()
 
         val result = credentialManager.getCredential(
@@ -42,19 +50,19 @@ suspend fun getGoogleIdToken(context: Context): String? {
 
         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
 
-        return googleIdTokenCredential.idToken
+        return Resource.Success(googleIdTokenCredential.idToken)
     } catch (e: CreateCredentialCancellationException) {
         //do nothing, the user chose not to save the credential
         Timber.tag("Credential").v("User cancelled the save: $e")
-        return null
+        return Resource.Error("User cancelled the save")
     } catch (e: CreateCredentialException) {
         Timber.tag("Credential").v("Credential save error: $e")
-        return null
+        return Resource.Error("Credential save error")
     } catch (e: GetCredentialCancellationException) {
         Timber.tag("Credential").v("User cancelled the get credential: $e")
-        return null
+        return Resource.Error("User cancelled the get credential")
     } catch (e: Exception) {
         Timber.tag("Credential").e("Error getting credential: $e")
-        return null
+        return Resource.Error("Error getting credential")
     }
 }
