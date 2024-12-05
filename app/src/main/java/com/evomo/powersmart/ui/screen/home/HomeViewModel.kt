@@ -4,10 +4,15 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import androidx.room.util.copy
 import com.evomo.powersmart.data.Resource
+import com.evomo.powersmart.data.anomaly.AnomalyRepository
 import com.evomo.powersmart.data.auth.AuthRepository
 import com.evomo.powersmart.data.remote.model.EnergyData
+import com.evomo.powersmart.ui.utils.toDateString
+import com.evomo.powersmart.ui.utils.toTimestamp
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import info.mqtt.android.service.MqttAndroidClient
@@ -38,6 +43,7 @@ import kotlin.random.Random
 class HomeViewModel @Inject constructor(
     private val application: Application,
     private val authRepository: AuthRepository,
+    private val anomalyRepository: AnomalyRepository
 ) : AndroidViewModel(application) {
 
     private val _state = MutableStateFlow(HomeState())
@@ -74,15 +80,23 @@ class HomeViewModel @Inject constructor(
     private val context: Context = application.applicationContext
 
     private lateinit var mqttAndroidClient: MqttAndroidClient
-    private val gson = Gson() // Untuk parsing JSON
+    private val gson = Gson()
 
     init {
+        observeAnomalies()
         setupMqtt()
 //        simulateActiveEnergyImport()
         getProfilePictureUrl()
     }
 
-    // Fungsi untuk mengatur MQTT
+    private fun observeAnomalies() {
+        anomalyRepository.getAnomalies().observeForever { anomalies ->
+            _state.update { currentState ->
+                currentState.copy(anomalies = anomalies)
+            }
+        }
+    }
+
     private fun setupMqtt() {
         val brokerUrl = "tcp://34.44.202.231" // URL broker
         val clientId = MqttClient.generateClientId()
@@ -157,11 +171,9 @@ class HomeViewModel @Inject constructor(
         })
     }
 
-    // Fungsi untuk menerima data dari MQTT
     private fun handleMqttData(data: EnergyData) {
         val newEnergy = data.active_energy_import
 
-        // Update apakah nilai bertambah atau berkurang
         updateEnergyIn(
             when {
                 newEnergy > _previousEnergy -> EnergyIn.INCREASE
@@ -171,8 +183,7 @@ class HomeViewModel @Inject constructor(
         )
         _previousEnergy = newEnergy
 
-        // Update status mesin
-        val threshold = 50000000.0 // Nilai batas untuk menentukan status mesin
+        val threshold = 50000000.0
         updateStatus(
             when {
                 newEnergy > threshold -> Status.DANGER
@@ -181,15 +192,13 @@ class HomeViewModel @Inject constructor(
             }
         )
 
-        // Update nilai active_energy_import dan waktu pembaruan terakhir
         updateActiveEnergyImport(newEnergy)
         updateLastUpdateTime(data.reading_time)
     }
 
-    // Fungsi untuk mensimulasikan data active_energy_import
     private fun simulateActiveEnergyImport() {
 
-        val threshold = 50000000.0 // Nilai batas yang digunakan untuk menentukan status mesin
+        val threshold = 50000000.0
 
         viewModelScope.launch {
             while (true) {
@@ -198,7 +207,6 @@ class HomeViewModel @Inject constructor(
                 updateAddedEnergy(energyToAdd)
                 val newEnergy = _state.value.activeEnergyImport + energyToAdd
 
-                // Update apakah nilai bertambah atau berkurang
                 updateEnergyIn(
                     when {
                         newEnergy > _previousEnergy -> EnergyIn.INCREASE
@@ -208,7 +216,6 @@ class HomeViewModel @Inject constructor(
                 )
                 _previousEnergy = newEnergy
 
-                // Update status mesin
                 updateStatus(
                     when {
                         newEnergy > threshold -> Status.DANGER
@@ -217,7 +224,6 @@ class HomeViewModel @Inject constructor(
                     }
                 )
 
-                // Update nilai active_energy_import dan last update time
                 updateActiveEnergyImport(newEnergy)
                 updateLastUpdateTime(getCurrentTime())
             }
@@ -244,7 +250,6 @@ class HomeViewModel @Inject constructor(
         _state.update { _state.value.copy(lastUpdateTime = newValue) }
     }
 
-    // Fungsi untuk mendapatkan waktu saat ini dalam format yang diinginkan
     private fun getCurrentTime(): String {
         val dateFormat = SimpleDateFormat("dd/MM/yy - HH:mm", Locale.getDefault())
         return dateFormat.format(Date())
@@ -252,11 +257,8 @@ class HomeViewModel @Inject constructor(
 
     private fun getProfilePictureUrl() {
         val response = authRepository.getSignedInUser()
-
         if (response is Resource.Success) {
-            _state.value = _state.value.copy(
-                profilePictureUrl = response.data?.profilePictureUrl
-            )
+            _state.update { it.copy(profilePictureUrl = response.data?.profilePictureUrl) }
         }
     }
 }

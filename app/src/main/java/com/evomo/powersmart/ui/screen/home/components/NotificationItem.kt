@@ -28,16 +28,14 @@ import java.util.Locale
 
 @Composable
 fun NotificationItem(
-    modifier: Modifier = Modifier,
-    timestamp: Timestamp,
+    timestamp: String,
     onClick: () -> Unit,
 ) {
     OutlinedCard(onClick = onClick) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 16.dp)
-                .then(modifier),
+                .padding(vertical = 16.dp, horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -47,11 +45,21 @@ fun NotificationItem(
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = timestamp.toDate().toFormattedString(),
+                text = timestamp,
                 fontSize = 16.sp
             )
         }
     }
+}
+
+
+fun Timestamp.toFormattedString(): String {
+    val format = SimpleDateFormat("dd MMM yyyy, HH:mm:ss", Locale.getDefault())
+    return format.format(this.toDate())
+}
+
+fun Timestamp.toDate(): Date {
+    return this.toDate()
 }
 
 fun Date.toFormattedString(): String {
@@ -68,7 +76,7 @@ private fun NotificationItemPreview() {
             Column {
                 repeat(3) {
                     NotificationItem(
-                        timestamp = Timestamp(Date()),
+                        timestamp = "24 Nov 2024, 08:00:00", // Dummy data
                         onClick = {}
                     )
                     Spacer(modifier = Modifier.padding(8.dp))
@@ -77,3 +85,4 @@ private fun NotificationItemPreview() {
         }
     }
 }
+

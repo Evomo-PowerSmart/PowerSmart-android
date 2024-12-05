@@ -11,6 +11,9 @@
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" >
         <action
+            android:id="@+id/action_homeFragment_to_notificationsFragment"
+            app:destination="@id/notificationsFragment" />
+        <action
             android:id="@+id/action_homeFragment_to_anomalyDetailFragment"
             app:destination="@id/anomalyDetailFragment" />
         <action
@@ -54,10 +57,23 @@
             app:popUpToInclusive="true" />
     </fragment>
     <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="com.evomo.powersmart.ui.screen.notifications.NotificationsFragment"
+        android:label="fragment_notifications"
+        tools:layout="@layout/fragment_notifications">
+        <action
+            android:id="@+id/action_notificationsFragment_to_anomalyDetailFragment"
+            app:destination="@id/anomalyDetailFragment" />
+    </fragment>
+    <fragment
         android:id="@+id/anomalyDetailFragment"
         android:name="com.evomo.powersmart.ui.screen.anomaly_detail.AnomalyDetailFragment"
         android:label="fragment_anomaly_detail"
-        tools:layout="@layout/fragment_anomaly_detail" />
+        tools:layout="@layout/fragment_anomaly_detail">
+        <argument
+            android:name="anomalyId"
+            app:argType="integer" />
+    </fragment>
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.evomo.powersmart.ui.screen.profile.ProfileFragment"
