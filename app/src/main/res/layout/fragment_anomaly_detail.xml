@@ -38,7 +38,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Measurement Information"
+                    android:text="@string/measurement_information"
                     android:textStyle="bold"
                     android:textSize="16sp"
                     android:paddingBottom="8dp" />
@@ -52,7 +52,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="reading_time"
+                        android:text="@string/reading_time"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvReadingTime"
@@ -70,7 +70,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="meter_serial_number"
+                        android:text="@string/meter_serial_number"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvMeterSerialNumber"
@@ -88,7 +88,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="meter_type"
+                        android:text="@string/meter_type"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvMeterType"
@@ -106,7 +106,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="data_type"
+                        android:text="@string/data_type"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvDataType"
@@ -137,7 +137,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Energy Consumption"
+                    android:text="@string/energy_consumption"
                     android:textStyle="bold"
                     android:textSize="16sp"
                     android:paddingBottom="8dp" />
@@ -152,7 +152,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="active_energy_import"
+                        android:text="@string/active_energy_import"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvActiveEnergyImport"
@@ -170,7 +170,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="active_energy_export"
+                        android:text="@string/active_energy_export"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvActiveEnergyExport"
@@ -188,7 +188,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="reactive_energy_import"
+                        android:text="@string/reactive_energy_import"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvReactiveEnergyImport"
@@ -206,7 +206,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="reactive_energy_export"
+                        android:text="@string/reactive_energy_export"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvReactiveEnergyExport"
@@ -224,7 +224,7 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="apparent_energy_import"
+                        android:text="@string/apparent_energy_import"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvApparentEnergyImport"
@@ -241,10 +241,28 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:text="apparent_energy_export"
+                        android:text="@string/apparent_energy_export"
                         android:textSize="14sp" />
                     <TextView
                         android:id="@+id/tvApparentEnergyExport"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:paddingBottom="6dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/predicted_energy"
+                        android:textSize="14sp" />
+                    <TextView
+                        android:id="@+id/tvPredictedEnergy"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="14sp"
