@@ -92,5 +92,10 @@
         android:id="@+id/monitoringDetailFragment"
         android:name="com.evomo.powersmart.ui.screen.monitoring_detail.MonitoringDetailFragment"
         android:label="fragment_monitoring_detail"
-        tools:layout="@layout/fragment_monitoring_detail" />
+        tools:layout="@layout/fragment_monitoring_detail" >
+        <argument
+            android:name="location"
+            app:argType="com.evomo.powersmart.ui.screen.home.Location"
+            android:defaultValue="AHU_LANTAI_2" />
+    </fragment>
 </navigation>

@@ -3,17 +3,5 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_empty">EmptyActivity</string>
-    <string name="measurement_information">Measurement Information</string>
-    <string name="reading_time">Reading Time</string>
-    <string name="meter_serial_number">Meter Serial Number</string>
-    <string name="meter_type">Meter Type</string>
-    <string name="data_type">Data Type</string>
-    <string name="energy_consumption">Energy Consumption</string>
-    <string name="active_energy_import">Active Energy Import</string>
-    <string name="active_energy_export">Active Energy Export</string>
-    <string name="reactive_energy_import">Reactive Energy Import</string>
-    <string name="reactive_energy_export">Reactive Energy Export</string>
-    <string name="apparent_energy_import">Apparent Energy Import</string>
-    <string name="apparent_energy_export">Apparent Energy Export</string>
-    <string name="predicted_energy">Predicted Energy</string>
+    <string name="default_notification_channel_id">anomaly_notification_channel</string>
 </resources>
