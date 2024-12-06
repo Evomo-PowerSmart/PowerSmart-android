@@ -1,9 +1,13 @@
 package com.evomo.powersmart.ui.utils
 
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 
 // Function to convert a String to LocalDateTime
 fun stringToLocalDateTime(dateTimeString: String): LocalDateTime {
@@ -35,4 +39,26 @@ fun getTimeStringFromTimeInMillis(timeInMillis: Long): String {
         .atZone(ZoneId.systemDefault())
         .toLocalTime()
         .format(formatter)
+}
+
+fun Long.toDateString(pattern: String = "dd/MM/yyyy"): String {
+    val sdf = SimpleDateFormat(pattern, Locale.getDefault())
+    return sdf.format(Date(this))
+}
+
+fun String.toTimestamp(pattern: String = "yyyy-MM-dd HH:mm:ss"): Timestamp? {
+    return try {
+        val sdf = SimpleDateFormat(pattern, Locale.getDefault())
+        val date = sdf.parse(this)
+        Timestamp(date!!)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+fun Timestamp.toDateString(pattern: String = "dd MMM yyyy, HH:mm:ss"): String {
+    val date = this.toDate()
+    val sdf = SimpleDateFormat(pattern, Locale.getDefault())
+    return sdf.format(date)
 }

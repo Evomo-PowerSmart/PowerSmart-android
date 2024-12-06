@@ -3,8 +3,9 @@ package com.evomo.powersmart.ui.screen.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.evomo.powersmart.data.Resource
+import com.evomo.powersmart.data.anomaly.AnomalyRepository
 import com.evomo.powersmart.data.auth.AuthRepository
-import com.evomo.powersmart.data.remote.LocationDataRepository
+import com.evomo.powersmart.data.location_data.LocationDataRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val locationDataRepository: LocationDataRepository,
+    private val anomalyRepository: AnomalyRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -33,6 +35,7 @@ class HomeViewModel @Inject constructor(
     init {
         getLastHistory()
         getProfilePictureUrl()
+        observeAnomalies()
     }
 
     private fun getLastHistory() = viewModelScope.launch {
@@ -75,6 +78,14 @@ class HomeViewModel @Inject constructor(
         }
 
         updateIsRealtimeDataLoading(false)
+    }
+
+    private fun observeAnomalies() {
+        anomalyRepository.getAnomalies().observeForever { anomalies ->
+            _state.update { currentState ->
+                currentState.copy(anomalies = anomalies)
+            }
+        }
     }
 
     private fun updateIsRealtimeDataLoading(newValue: Boolean) {

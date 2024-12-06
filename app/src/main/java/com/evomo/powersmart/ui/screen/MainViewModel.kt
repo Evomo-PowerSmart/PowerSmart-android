@@ -32,4 +32,5 @@ class MainViewModel @Inject constructor(
         _isUserLoggedIn.value = authRepository.getSignedInUser().data != null
         splashCondition = false
     }
+
 }

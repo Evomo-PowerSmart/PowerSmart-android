@@ -18,8 +18,11 @@ object EdgeToEdgeUtil {
         val window = activity.window
         val isDarkTheme =
             (activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-        WindowCompat.getInsetsController(window, view!!).isAppearanceLightStatusBars = !isDarkTheme
-        WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars =
-            !isDarkTheme
+
+        view?.let {
+            val controller = WindowCompat.getInsetsController(window, it)
+            controller.isAppearanceLightStatusBars = !isDarkTheme
+            controller.isAppearanceLightNavigationBars = !isDarkTheme
+        }
     }
 }
