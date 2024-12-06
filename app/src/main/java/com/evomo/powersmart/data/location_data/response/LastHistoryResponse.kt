@@ -1,4 +1,4 @@
-package com.evomo.powersmart.data.remote.response
+package com.evomo.powersmart.data.location_data.response
 
 import com.google.gson.annotations.SerializedName
 

@@ -3,10 +3,7 @@ package com.evomo.powersmart.ui.screen.anomaly_detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.evomo.powersmart.data.anomaly.AnomalyRepository
-import com.evomo.powersmart.data.anomaly.model.AnomalyDetailResponse
 import com.evomo.powersmart.data.anomaly.model.AnomalyDetailResponseItem
-import com.evomo.powersmart.ui.utils.toDateString
-import com.evomo.powersmart.ui.utils.toTimestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

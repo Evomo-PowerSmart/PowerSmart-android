@@ -10,14 +10,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.evomo.powersmart.R
 import com.evomo.powersmart.data.anomaly.model.AnomalyResponseItem
 import com.evomo.powersmart.ui.screen.home.components.toFormattedString
-import com.evomo.powersmart.ui.utils.toDateString
 import com.evomo.powersmart.ui.utils.toTimestamp
 
 class NotificationsAdapter(

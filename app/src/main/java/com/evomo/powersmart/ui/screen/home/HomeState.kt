@@ -1,5 +1,7 @@
 package com.evomo.powersmart.ui.screen.home
 
+import com.evomo.powersmart.data.anomaly.model.AnomalyResponseItem
+
 data class HomeState(
     val profilePictureUrl: String? = null,
     val isRealtimeDataLoading: Boolean = false,
@@ -10,4 +12,5 @@ data class HomeState(
     val lastUpdateTime: String? = null,
     val selectedLocationIndex: Int = 0,
     val selectedLocation: Location = Location.AHU_LANTAI_2,
+    val anomalies: List<AnomalyResponseItem> = emptyList()
 )

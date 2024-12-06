@@ -2,7 +2,7 @@ package com.evomo.powersmart.data.anomaly
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.evomo.powersmart.api.ApiService
+import com.evomo.powersmart.data.anomaly.api.ApiService
 import com.evomo.powersmart.data.anomaly.model.AnomalyDetailResponse
 import com.evomo.powersmart.data.anomaly.model.AnomalyDetailResponseItem
 import com.evomo.powersmart.data.anomaly.model.AnomalyResponseItem
