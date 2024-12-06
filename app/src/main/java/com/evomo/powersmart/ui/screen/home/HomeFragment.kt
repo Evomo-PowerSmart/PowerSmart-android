@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -52,14 +54,14 @@ import com.evomo.powersmart.ui.screen.home.components.SmallProfileIcon
 import com.evomo.powersmart.ui.theme.PowerSmartTheme
 import com.evomo.powersmart.ui.theme.commonTopAppBarColor
 import com.evomo.powersmart.ui.theme.spacing
-import com.google.firebase.Timestamp
+import com.evomo.powersmart.ui.utils.toDateString
+import com.evomo.powersmart.ui.utils.toTimestamp
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
-import java.util.UUID
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -219,7 +221,11 @@ class HomeFragment : Fragment() {
                                             fontWeight = FontWeight.Bold
                                         )
                                     )
-                                    IconButton(onClick = {}) {
+                                    IconButton(onClick = {
+                                        Navigation.findNavController(view).navigate(
+                                            HomeFragmentDirections.actionHomeFragmentToNotificationsFragment()
+                                        )
+                                    }) {
                                         Icon(
                                             imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                                             contentDescription = null
@@ -230,18 +236,36 @@ class HomeFragment : Fragment() {
                                 Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
                                 LazyColumn(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    items(count = 3, key = { UUID.randomUUID() }) {
-                                        NotificationItem(
-                                            timestamp = Timestamp.now(),
-                                            onClick = {
-                                                Navigation.findNavController(view).navigate(
-                                                    HomeFragmentDirections.actionHomeFragmentToAnomalyDetailFragment()
-                                                )
-                                            }
-                                        )
-                                        Spacer(modifier = Modifier.size(16.dp))
+                                    if (state.anomalies.isEmpty()) {
+                                        item {
+                                            Text(
+                                                text = "No notifications available",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                modifier = Modifier.padding(16.dp),
+                                                textAlign = TextAlign.Center
+                                            )
+                                        }
+                                    } else {
+                                        items(state.anomalies, key = { it.id }) { anomaly ->
+                                            val timestamp =
+                                                anomaly.readingTime.toTimestamp()?.toDateString()
+                                                    ?: "Unknown Time"
+                                            println("Anomaly ID: ${anomaly.id}, Reading Time: ${anomaly.readingTime}, Converted: $timestamp")
+
+                                            NotificationItem(
+                                                timestamp = timestamp,
+                                                onClick = {
+                                                    Navigation.findNavController(view).navigate(
+                                                        HomeFragmentDirections.actionHomeFragmentToAnomalyDetailFragment(
+                                                            anomaly.id
+                                                        )
+                                                    )
+                                                }
+                                            )
+                                            Spacer(modifier = Modifier.size(16.dp))
+                                        }
                                     }
                                 }
                             }

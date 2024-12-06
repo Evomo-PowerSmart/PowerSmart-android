@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.evomo.powersmart.data.Resource
-import com.evomo.powersmart.data.remote.LocationDataRepository
+import com.evomo.powersmart.data.location_data.LocationDataRepository
 import com.evomo.powersmart.ui.utils.getStringDateFromEpochMilli
 import com.evomo.powersmart.ui.utils.getTimeStringFromTimeInMillis
 import com.evomo.powersmart.ui.utils.stringToLocalDateTime

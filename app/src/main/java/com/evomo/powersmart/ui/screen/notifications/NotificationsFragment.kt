@@ -4,14 +4,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.evomo.powersmart.R
 import com.evomo.powersmart.databinding.FragmentNotificationsBinding
+import com.evomo.powersmart.ui.theme.PowerSmartTheme
+import com.evomo.powersmart.ui.theme.commonTopAppBarColor
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -24,22 +33,42 @@ class NotificationsFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.md_theme_primary)
-
-        binding.toolbar.apply {
-            title = "Notifications"
-            navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
-            setNavigationOnClickListener {
-                findNavController().navigateUp()
+        // Setup toolbar
+        binding.cvToolbar.apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
+            )
+            setContent {
+                PowerSmartTheme {
+                    Surface {
+                        TopAppBar(
+                            colors = commonTopAppBarColor(),
+                            title = {
+                                Text(text = "Notifications")
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = {
+                                    Navigation.findNavController(binding.root).popBackStack()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowBackIosNew,
+                                        contentDescription = null
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
             }
         }
 
@@ -54,7 +83,7 @@ class NotificationsFragment : Fragment() {
         }
         binding.recyclerView.adapter = adapter
 
-        notificationsViewModel.anomalies.observe(viewLifecycleOwner, Observer { anomalies ->
+        notificationsViewModel.anomalies.observe(viewLifecycleOwner) { anomalies ->
             if (anomalies.isNullOrEmpty()) {
                 binding.tvPlaceholder.visibility = View.VISIBLE
                 binding.recyclerView.visibility = View.GONE
@@ -63,7 +92,7 @@ class NotificationsFragment : Fragment() {
                 binding.recyclerView.visibility = View.VISIBLE
                 adapter.submitList(anomalies)
             }
-        })
+        }
 
         notificationsViewModel.fetchAnomalies()
     }

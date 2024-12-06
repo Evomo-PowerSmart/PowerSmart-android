@@ -1,9 +1,9 @@
-package com.evomo.powersmart.data.remote
+package com.evomo.powersmart.data.location_data
 
 import com.evomo.powersmart.data.Resource
-import com.evomo.powersmart.data.remote.api.LocationDataApiService
-import com.evomo.powersmart.data.remote.response.HistoricalDataResponse
-import com.evomo.powersmart.data.remote.response.LastHistoryResponse
+import com.evomo.powersmart.data.location_data.api.LocationDataApiService
+import com.evomo.powersmart.data.location_data.response.HistoricalDataResponse
+import com.evomo.powersmart.data.location_data.response.LastHistoryResponse
 import javax.inject.Inject
 
 class LocationDataRepository @Inject constructor(

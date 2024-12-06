@@ -1,7 +1,7 @@
-package com.evomo.powersmart.data.remote.api
+package com.evomo.powersmart.data.location_data.api
 
-import com.evomo.powersmart.data.remote.response.HistoricalDataResponse
-import com.evomo.powersmart.data.remote.response.LastHistoryResponse
+import com.evomo.powersmart.data.location_data.response.HistoricalDataResponse
+import com.evomo.powersmart.data.location_data.response.LastHistoryResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 
