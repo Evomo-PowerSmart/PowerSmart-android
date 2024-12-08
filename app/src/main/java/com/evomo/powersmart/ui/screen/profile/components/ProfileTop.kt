@@ -1,6 +1,7 @@
 package com.evomo.powersmart.ui.screen.profile.components
 
 import android.content.res.Configuration
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,11 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.evomo.powersmart.R
 import com.evomo.powersmart.data.auth.model.SignedInResponse
 import com.evomo.powersmart.ui.theme.PowerSmartTheme
 import com.evomo.powersmart.ui.theme.spacing
@@ -55,13 +58,24 @@ fun ProfileTop(
                     horizontal = MaterialTheme.spacing.large
                 )
         ) {
-            AsyncImage(
-                model = userData?.profilePictureUrl,
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .size(102.dp)
-                    .clip(CircleShape), contentScale = ContentScale.Crop
-            )
+            if (userData?.profilePictureUrl.isNullOrBlank() || userData?.profilePictureUrl == "null") {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_profile_stock),
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier
+                        .size(102.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop,
+                )
+            } else {
+                AsyncImage(
+                    model = userData?.profilePictureUrl,
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier
+                        .size(102.dp)
+                        .clip(CircleShape), contentScale = ContentScale.Crop
+                )
+            }
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
             Text(
                 text = userData?.userName ?: "N/A",

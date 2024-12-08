@@ -16,4 +16,5 @@
     <string name="notifications_null">0 Notifications</string>
     <string name="notification_icon">Notification Icon</string>
     <string name="notification_message">Notifications Message</string>
+    <string name="notifications_title">Notifications</string>
 </resources>

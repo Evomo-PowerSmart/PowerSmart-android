@@ -1,5 +1,6 @@
 package com.evomo.powersmart.ui.screen.notifications
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +31,7 @@ class NotificationsFragment : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -45,9 +47,7 @@ class NotificationsFragment : Fragment() {
 
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        // Adapter dengan callback onItemClick
         val adapter = NotificationsAdapter { anomaly ->
-            // Saat item diklik, navigasi ke AnomalyDetailFragment dan kirim anomalyId
             val action = NotificationsFragmentDirections
                 .actionNotificationsFragmentToAnomalyDetailFragment(anomaly.id)
             findNavController().navigate(action)
@@ -58,12 +58,12 @@ class NotificationsFragment : Fragment() {
             if (anomalies.isNullOrEmpty()) {
                 binding.tvPlaceholder.visibility = View.VISIBLE
                 binding.recyclerView.visibility = View.GONE
-                binding.notificationCount.text = "0 Notifications"  // Update count to 0
+                binding.notificationCount.text = "No Notification Available"
             } else {
                 binding.tvPlaceholder.visibility = View.GONE
                 binding.recyclerView.visibility = View.VISIBLE
                 adapter.submitList(anomalies)
-                binding.notificationCount.text = "${anomalies.size} Notifications"  // Update count dynamically
+                binding.notificationCount.text = "${anomalies.size} Notifications"
             }
         })
 

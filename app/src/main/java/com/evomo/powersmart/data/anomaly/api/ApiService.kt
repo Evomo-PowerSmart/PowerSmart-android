@@ -1,4 +1,4 @@
-package com.evomo.powersmart.api
+package com.evomo.powersmart.data.anomaly.api
 
 import com.evomo.powersmart.data.anomaly.model.AnomalyDetailResponse
 import com.evomo.powersmart.data.anomaly.model.AnomalyResponseItem
