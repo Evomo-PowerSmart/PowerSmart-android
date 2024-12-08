@@ -13,4 +13,7 @@
     <string name="apparent_energy_import">Apparent Energy Import</string>
     <string name="apparent_energy_export">Apparent Energy Export</string>
     <string name="predicted_energy">Predicted Energy</string>
+    <string name="notifications_null">0 Notifications</string>
+    <string name="notification_icon">Notification Icon</string>
+    <string name="notification_message">Notifications Message</string>
 </resources>

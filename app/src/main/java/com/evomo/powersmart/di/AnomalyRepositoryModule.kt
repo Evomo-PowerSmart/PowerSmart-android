@@ -22,5 +22,3 @@ object AnomalyRepositoryModule {
         return AnomalyRepository(apiService)
     }
 }
-
-

@@ -8,19 +8,19 @@ data class AnomalyDetailResponseItem(
 	val readingTime: String,
 
 	@field:SerializedName("apparent_energy_import")
-	val apparentEnergyImport: Double,  // Menggunakan tipe data Double
+	val apparentEnergyImport: Double,
 
 	@field:SerializedName("active_energy_import")
-	val activeEnergyImport: Double,  // Menggunakan tipe data Double
+	val activeEnergyImport: Double,
 
 	@field:SerializedName("reactive_energy_export")
-	val reactiveEnergyExport: Double,  // Menggunakan tipe data Double
+	val reactiveEnergyExport: Double,
 
 	@field:SerializedName("anomaly_type")
 	val anomalyType: String,
 
 	@field:SerializedName("predicted_energy")
-	val predictedEnergy: Double,  // Menggunakan tipe data Double
+	val predictedEnergy: Double,
 
 	@field:SerializedName("position")
 	val position: String,
@@ -29,10 +29,10 @@ data class AnomalyDetailResponseItem(
 	val meterType: String,
 
 	@field:SerializedName("reactive_energy_import")
-	val reactiveEnergyImport: Double,  // Menggunakan tipe data Double
+	val reactiveEnergyImport: Double,
 
 	@field:SerializedName("apparent_energy_export")
-	val apparentEnergyExport: Int,  // Jika ini adalah nilai integer
+	val apparentEnergyExport: Int,
 
 	@field:SerializedName("meter_serial_number")
 	val meterSerialNumber: Int,
@@ -41,6 +41,4 @@ data class AnomalyDetailResponseItem(
 	val activeEnergyExport: Int
 )
 
-// Karena respons API adalah array langsung, kita bisa mendefinisikan model seperti ini:
 typealias AnomalyDetailResponse = List<AnomalyDetailResponseItem>
-
