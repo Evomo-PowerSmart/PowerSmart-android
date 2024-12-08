@@ -36,11 +36,12 @@
                 android:layout_margin="10dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/measurement_information"
                     android:textStyle="bold"
                     android:textSize="16sp"
+                    android:gravity="center"
                     android:paddingBottom="8dp" />
 
                 <LinearLayout
@@ -135,11 +136,12 @@
                 android:layout_margin="10dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/energy_consumption"
                     android:textStyle="bold"
                     android:textSize="16sp"
+                    android:gravity="center"
                     android:paddingBottom="8dp" />
 
                 <!-- Row for each data field -->

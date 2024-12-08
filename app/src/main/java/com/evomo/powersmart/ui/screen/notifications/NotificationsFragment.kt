@@ -58,10 +58,12 @@ class NotificationsFragment : Fragment() {
             if (anomalies.isNullOrEmpty()) {
                 binding.tvPlaceholder.visibility = View.VISIBLE
                 binding.recyclerView.visibility = View.GONE
+                binding.notificationCount.text = "0 Notifications"  // Update count to 0
             } else {
                 binding.tvPlaceholder.visibility = View.GONE
                 binding.recyclerView.visibility = View.VISIBLE
                 adapter.submitList(anomalies)
+                binding.notificationCount.text = "${anomalies.size} Notifications"  // Update count dynamically
             }
         })
 
@@ -73,7 +75,3 @@ class NotificationsFragment : Fragment() {
         _binding = null
     }
 }
-
-
-
-

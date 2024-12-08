@@ -30,7 +30,6 @@ class AnomalyDetailFragment : Fragment() {
 
     private val viewModel: AnomalyDetailViewModel by viewModels()
 
-    // Ambil anomalyId menggunakan NavArgs
     private val args: AnomalyDetailFragmentArgs by navArgs()
 
     override fun onCreateView(
@@ -45,7 +44,6 @@ class AnomalyDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Setup toolbar
         binding.cvToolbar.apply {
             setViewCompositionStrategy(
                 ViewCompositionStrategy.DisposeOnLifecycleDestroyed(viewLifecycleOwner)
@@ -74,7 +72,7 @@ class AnomalyDetailFragment : Fragment() {
             }
         }
 
-        val anomalyId = args.anomalyId // Ambil anomalyId dari argument
+        val anomalyId = args.anomalyId
 
         if (anomalyId > 0) {
             Timber.d("Fetching anomaly detail with ID: $anomalyId")

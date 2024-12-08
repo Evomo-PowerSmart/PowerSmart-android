@@ -3,7 +3,6 @@ package com.evomo.powersmart.data.anomaly
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.evomo.powersmart.api.ApiService
-import com.evomo.powersmart.data.anomaly.model.AnomalyDetailResponse
 import com.evomo.powersmart.data.anomaly.model.AnomalyDetailResponseItem
 import com.evomo.powersmart.data.anomaly.model.AnomalyResponseItem
 import retrofit2.Call
@@ -19,11 +18,11 @@ class AnomalyRepository @Inject constructor(
     fun getAnomalies(): LiveData<List<AnomalyResponseItem>> {
         val liveData = MutableLiveData<List<AnomalyResponseItem>>()
 
-        apiService.getAnomalies().enqueue(object : Callback<List<AnomalyResponseItem>> {  // Perbaiki di sini, ubah menjadi List<AnomalyResponseItem>
+        apiService.getAnomalies().enqueue(object : Callback<List<AnomalyResponseItem>> {
             override fun onResponse(call: Call<List<AnomalyResponseItem>>, response: Response<List<AnomalyResponseItem>>) {
                 if (response.isSuccessful) {
-                    val anomalies = response.body() ?: emptyList()  // Langsung ambil body sebagai list
-                    Timber.d("Fetched anomalies: $anomalies")  // Log data
+                    val anomalies = response.body() ?: emptyList()
+                    Timber.d("Fetched anomalies: $anomalies")
                     liveData.postValue(anomalies)
                 } else {
                     Timber.e("Error fetching anomalies: ${response.message()}")
@@ -34,9 +33,6 @@ class AnomalyRepository @Inject constructor(
             override fun onFailure(call: Call<List<AnomalyResponseItem>>, t: Throwable) {
                 Timber.e(t, "Error fetching anomalies")
                 liveData.postValue(emptyList())
-
-
-
             }
         })
 
@@ -50,7 +46,7 @@ class AnomalyRepository @Inject constructor(
         apiService.getAnomalyDetails(id).enqueue(object : Callback<List<AnomalyDetailResponseItem>> {
             override fun onResponse(call: Call<List<AnomalyDetailResponseItem>>, response: Response<List<AnomalyDetailResponseItem>>) {
                 if (response.isSuccessful) {
-                    liveData.postValue(response.body())  // Mengirim list hasil response
+                    liveData.postValue(response.body())
                     Timber.d("Fetched anomaly details: ${response.body()}")
                 } else {
                     Timber.e("Error fetching anomaly detail: ${response.message()}")
@@ -66,9 +62,4 @@ class AnomalyRepository @Inject constructor(
 
         return liveData
     }
-
-
 }
-
-
-

@@ -63,7 +63,6 @@ class HomeFragment : Fragment() {
 
                         val snackbarHomeState = remember { SnackbarHostState() }
 
-                        // Mengumpulkan pesan untuk Snackbar
                         LaunchedEffect(key1 = true) {
                             viewModel.messageFlow.collectLatest { message ->
                                 snackbarHomeState.showSnackbar(message)

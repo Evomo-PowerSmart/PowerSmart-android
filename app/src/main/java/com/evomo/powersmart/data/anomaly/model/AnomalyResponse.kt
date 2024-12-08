@@ -17,4 +17,3 @@ data class AnomalyResponseItem(
 )
 
 typealias AnomalyList = List<AnomalyResponseItem>
-

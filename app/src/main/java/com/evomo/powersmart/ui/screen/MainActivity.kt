@@ -32,7 +32,6 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         val navGraph = navController.navInflater.inflate(R.navigation.main_navigation)
 
-        // Observe login state and set NavGraph
         lifecycleScope.launch {
             viewModel.isUserLoggedIn.collectLatest { isLoggedIn ->
                 navGraph.setStartDestination(if (isLoggedIn) R.id.homeFragment else R.id.loginFragment)
@@ -42,5 +41,4 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 }

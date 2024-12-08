@@ -4,15 +4,11 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
-import androidx.room.util.copy
 import com.evomo.powersmart.data.Resource
 import com.evomo.powersmart.data.anomaly.AnomalyRepository
 import com.evomo.powersmart.data.auth.AuthRepository
 import com.evomo.powersmart.data.remote.model.EnergyData
-import com.evomo.powersmart.ui.utils.toDateString
-import com.evomo.powersmart.ui.utils.toTimestamp
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import info.mqtt.android.service.MqttAndroidClient
@@ -98,7 +94,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun setupMqtt() {
-        val brokerUrl = "tcp://34.44.202.231" // URL broker
+        val brokerUrl = "tcp://34.44.202.231"
         val clientId = MqttClient.generateClientId()
         mqttAndroidClient = MqttAndroidClient(context, brokerUrl, clientId)
 
