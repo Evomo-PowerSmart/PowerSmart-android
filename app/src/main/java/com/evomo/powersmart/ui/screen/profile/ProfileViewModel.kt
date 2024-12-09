@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.evomo.powersmart.data.Resource
 import com.evomo.powersmart.data.auth.AuthRepository
+import com.evomo.powersmart.data.preferences.PreferenceManager
+import com.evomo.powersmart.data.preferences.Theme
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -12,12 +14,16 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val preferenceManager: PreferenceManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProfileState())
@@ -28,6 +34,19 @@ class ProfileViewModel @Inject constructor(
 
     init {
         getSignedInUser()
+        getPreferences()
+    }
+
+    private fun getPreferences() = viewModelScope.launch {
+        preferenceManager.getTheme().onEach { theme ->
+            _state.update { it.copy(themeValue = theme.value) }
+        }.stateIn(viewModelScope)
+    }
+
+    fun setTheme(theme: Theme) {
+        viewModelScope.launch {
+            preferenceManager.setTheme(theme)
+        }
     }
 
     private fun getSignedInUser() {

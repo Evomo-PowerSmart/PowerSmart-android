@@ -2,8 +2,7 @@ package com.evomo.powersmart.data.anomaly
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.evomo.powersmart.data.anomaly.api.ApiService
-import com.evomo.powersmart.data.anomaly.model.AnomalyDetailResponse
+import com.evomo.powersmart.data.anomaly.api.AnomalyApiService
 import com.evomo.powersmart.data.anomaly.model.AnomalyDetailResponseItem
 import com.evomo.powersmart.data.anomaly.model.AnomalyResponseItem
 import retrofit2.Call
@@ -13,13 +12,13 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class AnomalyRepository @Inject constructor(
-    private val apiService: ApiService
+    private val anomalyApiService: AnomalyApiService
 ) {
 
     fun getAnomalies(): LiveData<List<AnomalyResponseItem>> {
         val liveData = MutableLiveData<List<AnomalyResponseItem>>()
 
-        apiService.getAnomalies().enqueue(object : Callback<List<AnomalyResponseItem>> {
+        anomalyApiService.getAnomalies().enqueue(object : Callback<List<AnomalyResponseItem>> {
             override fun onResponse(call: Call<List<AnomalyResponseItem>>, response: Response<List<AnomalyResponseItem>>) {
                 if (response.isSuccessful) {
                     val anomalies = response.body() ?: emptyList()
@@ -44,7 +43,7 @@ class AnomalyRepository @Inject constructor(
     fun getAnomalyDetail(id: Int): LiveData<List<AnomalyDetailResponseItem>> {
         val liveData = MutableLiveData<List<AnomalyDetailResponseItem>>()
 
-        apiService.getAnomalyDetails(id).enqueue(object : Callback<List<AnomalyDetailResponseItem>> {
+        anomalyApiService.getAnomalyDetails(id).enqueue(object : Callback<List<AnomalyDetailResponseItem>> {
             override fun onResponse(call: Call<List<AnomalyDetailResponseItem>>, response: Response<List<AnomalyDetailResponseItem>>) {
                 if (response.isSuccessful) {
                     liveData.postValue(response.body())

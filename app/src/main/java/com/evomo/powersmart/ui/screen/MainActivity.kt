@@ -40,5 +40,23 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+//        lifecycleScope.launch {
+//            viewModel.themeValue.collect { theme ->
+//                when (theme) {
+//                    Theme.LIGHT -> {
+//                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+//                    }
+//
+//                    Theme.DARK -> {
+//                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+//                    }
+//
+//                    Theme.SYSTEM_DEFAULT -> {
+//                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+//                    }
+//                }
+//            }
+//        }
     }
 }

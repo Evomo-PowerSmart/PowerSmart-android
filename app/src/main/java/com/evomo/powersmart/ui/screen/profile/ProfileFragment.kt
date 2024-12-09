@@ -4,44 +4,50 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
+import com.evomo.powersmart.BuildConfig
+import com.evomo.powersmart.R
 import com.evomo.powersmart.databinding.FragmentProfileBinding
 import com.evomo.powersmart.ui.components.FullscreenLoading
+import com.evomo.powersmart.ui.screen.profile.components.ProfileMoreOptionBottomSheet
 import com.evomo.powersmart.ui.screen.profile.components.ProfileTop
+import com.evomo.powersmart.ui.screen.profile.components.SettingsSection
 import com.evomo.powersmart.ui.theme.PowerSmartTheme
 import com.evomo.powersmart.ui.theme.commonTopAppBarColor
+import com.evomo.powersmart.ui.theme.spacing
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment() {
@@ -71,6 +77,8 @@ class ProfileFragment : Fragment() {
                 PowerSmartTheme {
                     Surface {
                         val state by viewModel.state.collectAsState()
+                        val scope = rememberCoroutineScope()
+                        val profileMoreOptionBottomSheetState = rememberModalBottomSheetState()
 
                         val snackbarHostState = remember { SnackbarHostState() }
 
@@ -107,6 +115,16 @@ class ProfileFragment : Fragment() {
                                                 contentDescription = null
                                             )
                                         }
+                                    },
+                                    actions = {
+                                        IconButton(onClick = {
+                                            scope.launch { profileMoreOptionBottomSheetState.show() }
+                                        }) {
+                                            Icon(
+                                                imageVector = Icons.Default.MoreHoriz,
+                                                contentDescription = null
+                                            )
+                                        }
                                     }
                                 )
                             }
@@ -121,23 +139,38 @@ class ProfileFragment : Fragment() {
                                 ProfileTop(
                                     userData = state.userData,
                                 )
-
-                                Spacer(modifier = Modifier.weight(1f))
-
-                                OutlinedButton(
-                                    modifier = Modifier.padding(16.dp),
-                                    onClick = viewModel::onSignOut,
-                                    colors = ButtonDefaults.buttonColors().copy(
-                                        containerColor = MaterialTheme.colorScheme.surface,
-                                        contentColor = MaterialTheme.colorScheme.error
+                                SettingsSection(
+                                    modifier = Modifier.padding(vertical = MaterialTheme.spacing.medium),
+                                    themeValue = state.themeValue,
+                                    onThemeClick = {
+                                        viewModel.setTheme(it)
+                                    },
+                                    aboutValue = context.getString(
+                                        R.string.version,
+                                        BuildConfig.VERSION_NAME
                                     ),
-                                ) {
-                                    Text(text = "Logout")
-                                }
+                                    onAboutClick = {
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "App Version: ${BuildConfig.VERSION_NAME}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                )
                             }
                         }
                         if (state.isLoading) {
                             FullscreenLoading()
+                        }
+                        if (profileMoreOptionBottomSheetState.isVisible) {
+                            ProfileMoreOptionBottomSheet(
+                                onDismissRequest = { scope.launch { profileMoreOptionBottomSheetState.hide() } },
+                                sheetState = profileMoreOptionBottomSheetState,
+                                onSignOutClick = {
+                                    viewModel.onSignOut()
+                                    scope.launch { profileMoreOptionBottomSheetState.hide() }
+                                },
+                            )
                         }
                     }
 

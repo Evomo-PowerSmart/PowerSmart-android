@@ -1,7 +1,7 @@
 package com.evomo.powersmart.di
 
 import com.evomo.powersmart.data.anomaly.AnomalyRepository
-import com.evomo.powersmart.data.anomaly.api.ApiService
+import com.evomo.powersmart.data.anomaly.api.AnomalyApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,12 +13,12 @@ import retrofit2.Retrofit
 object AnomalyRepositoryModule {
 
     @Provides
-    fun provideApiService(retrofit: Retrofit): ApiService {
-        return retrofit.create(ApiService::class.java)
+    fun provideAnomalyApiService(retrofit: Retrofit): AnomalyApiService {
+        return retrofit.create(AnomalyApiService::class.java)
     }
 
     @Provides
-    fun provideAnomalyRepository(apiService: ApiService): AnomalyRepository {
-        return AnomalyRepository(apiService)
+    fun provideAnomalyRepository(anomalyApiService: AnomalyApiService): AnomalyRepository {
+        return AnomalyRepository(anomalyApiService)
     }
 }
