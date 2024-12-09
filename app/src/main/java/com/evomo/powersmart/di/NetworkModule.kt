@@ -49,11 +49,4 @@ object NetworkModule {
             .client(okHttpClient)
             .build()
     }
-
-    @Provides
-    @Singleton
-    fun provideLocationDataApiService(
-        retrofit: Retrofit,
-    ): LocationDataApiService =
-        retrofit.create(LocationDataApiService::class.java)
 }

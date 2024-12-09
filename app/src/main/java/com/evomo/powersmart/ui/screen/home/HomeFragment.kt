@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,12 +55,8 @@ import com.evomo.powersmart.ui.theme.commonTopAppBarColor
 import com.evomo.powersmart.ui.theme.spacing
 import com.evomo.powersmart.ui.utils.toDateString
 import com.evomo.powersmart.ui.utils.toTimestamp
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.ktx.messaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.tasks.await
-import timber.log.Timber
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -127,11 +122,6 @@ class HomeFragment : Fragment() {
                             viewModel.messageFlow.collectLatest { message ->
                                 snackbarHomeState.showSnackbar(message)
                             }
-                        }
-
-                        LaunchedEffect(key1 = Unit) {
-                            val fcmToken = Firebase.messaging.token.await()
-                            Timber.i("fcm token: $fcmToken")
                         }
 
                         Scaffold(
@@ -248,7 +238,8 @@ class HomeFragment : Fragment() {
                                             )
                                         }
                                     } else {
-                                        items(state.anomalies, key = { it.id }) { anomaly ->
+                                        items(count = 5, key = { it }) { index ->
+                                            val anomaly = state.anomalies[index]
                                             val timestamp =
                                                 anomaly.readingTime.toTimestamp()?.toDateString()
                                                     ?: "Unknown Time"

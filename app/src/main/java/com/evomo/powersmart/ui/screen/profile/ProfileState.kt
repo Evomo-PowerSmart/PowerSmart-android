@@ -6,4 +6,5 @@ data class ProfileState(
     val isLoading: Boolean = false,
     val userData: SignedInResponse? = null,
     val isLogoutSuccess: Boolean = false,
+    val themeValue: String = ""
 )

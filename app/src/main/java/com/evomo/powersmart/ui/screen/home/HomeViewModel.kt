@@ -6,22 +6,32 @@ import com.evomo.powersmart.data.Resource
 import com.evomo.powersmart.data.anomaly.AnomalyRepository
 import com.evomo.powersmart.data.auth.AuthRepository
 import com.evomo.powersmart.data.location_data.LocationDataRepository
+import com.evomo.powersmart.data.notification.NotificationTokenRepository
+import com.evomo.powersmart.data.preferences.PreferenceManager
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val locationDataRepository: LocationDataRepository,
-    private val anomalyRepository: AnomalyRepository
+    private val anomalyRepository: AnomalyRepository,
+    private val notificationTokenRepository: NotificationTokenRepository,
+    private val preferenceManager: PreferenceManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -30,12 +40,19 @@ class HomeViewModel @Inject constructor(
     private val _messageFlow = MutableSharedFlow<String>()
     val messageFlow: SharedFlow<String> = _messageFlow.asSharedFlow()
 
+    private val _isTokenSent = preferenceManager.getIsTokenSent().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = true
+    )
+
     private val activeEnergyImportTreshold = 180000000.0
 
     init {
         getLastHistory()
         getProfilePictureUrl()
         observeAnomalies()
+        sendNotificationTokenIfNotSent()
     }
 
     private fun getLastHistory() = viewModelScope.launch {
@@ -84,6 +101,24 @@ class HomeViewModel @Inject constructor(
         anomalyRepository.getAnomalies().observeForever { anomalies ->
             _state.update { currentState ->
                 currentState.copy(anomalies = anomalies)
+            }
+        }
+    }
+
+    private fun sendNotificationTokenIfNotSent() = viewModelScope.launch {
+        _isTokenSent.collectLatest { isTokenSent ->
+            Timber.d("is fcm token sent: $isTokenSent")
+            if (!isTokenSent) {
+                val token = FirebaseMessaging.getInstance().token.await()
+
+                val response = notificationTokenRepository.addNotificationToken(token)
+
+                if (response is Resource.Success) {
+                    Timber.d("FCM token sent successfully")
+                    preferenceManager.setIsTokenSent(true)
+                } else if (response is Resource.Error) {
+                    Timber.e("Failed to send FCM token: ${response.message}")
+                }
             }
         }
     }
