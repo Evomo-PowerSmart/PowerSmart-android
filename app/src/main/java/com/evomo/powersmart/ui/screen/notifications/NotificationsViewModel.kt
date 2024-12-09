@@ -18,11 +18,7 @@ class NotificationsViewModel @Inject constructor(
 
     fun fetchAnomalies() {
         anomalyRepository.getAnomalies().observeForever {
-            _anomalies.value = it // Pastikan ini benar-benar mengupdate dengan data yang valid
+            _anomalies.value = it
         }
     }
 }
-
-
-
-

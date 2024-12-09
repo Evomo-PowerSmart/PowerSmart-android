@@ -13,5 +13,3 @@ interface ApiService {
     @GET("/api/fetch_data/anomaly/{id}")
     fun getAnomalyDetails(@Path("id") id: Int): Call<AnomalyDetailResponse>
 }
-
-

@@ -37,37 +37,24 @@ class NotificationsAdapter(
         private val tvMessage: TextView = itemView.findViewById(R.id.tv_message)
 
         fun bind(notification: AnomalyResponseItem) {
-            // Membuat SpannableStringBuilder untuk format teks
             val formattedText = SpannableStringBuilder()
-
-            // Menambahkan anomalyType dengan gaya bold
             val anomalyType = notification.anomalyType
             val anomalyTypeSpan = SpannableString(anomalyType).apply {
                 setSpan(StyleSpan(Typeface.BOLD), 0, anomalyType.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
 
-            // Menambahkan anomalyType ke formattedText
             formattedText.append(anomalyTypeSpan)
-
-            // Menambahkan \n untuk pemisah
             formattedText.append("\n")
 
-            // Mengubah readingTime menjadi Timestamp dan memformatnya
             val formattedDate = notification.readingTime.toTimestamp()?.toFormattedString()
-
-            // Menambahkan position dan formattedDate
             val positionTimeText = "${notification.position}, $formattedDate"
             formattedText.append(positionTimeText)
 
-            // Menetapkan formattedText ke TextView
             tvMessage.text = formattedText
+            ivIcon.setImageResource(R.drawable.ic_notification)
 
-            // Set the icon (you can use different icons based on the notification type)
-            ivIcon.setImageResource(R.drawable.ic_notification) // Ganti dengan resource ikon yang sesuai
-
-            // Mengatur OnClickListener untuk item view
             itemView.setOnClickListener {
-                onItemClick(notification) // Kirim data anomaly yang diklik
+                onItemClick(notification)
             }
         }
     }
@@ -82,4 +69,3 @@ class NotificationsAdapter(
         }
     }
 }
-
