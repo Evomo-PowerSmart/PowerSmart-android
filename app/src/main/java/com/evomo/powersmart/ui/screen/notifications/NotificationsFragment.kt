@@ -35,8 +35,6 @@ class NotificationsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.md_theme_primary)
-
         binding.toolbar.apply {
             title = "Notifications"
             navigationIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_back)
