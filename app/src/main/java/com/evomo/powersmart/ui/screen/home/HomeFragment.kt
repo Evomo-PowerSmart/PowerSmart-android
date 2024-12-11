@@ -57,6 +57,7 @@ import com.evomo.powersmart.ui.utils.toDateString
 import com.evomo.powersmart.ui.utils.toTimestamp
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import timber.log.Timber
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -183,7 +184,7 @@ class HomeFragment : Fragment() {
                                 RealtimeBox(
                                     isLoading = state.isRealtimeDataLoading,
                                     location = state.selectedLocation.display,
-                                    lastUpdated = state.lastUpdateTime ?: "No data available yet",
+                                    lastUpdated = if (state.lastUpdateTime != null) "${state.lastUpdateTime} WIB" else "No data available yet",
                                     unitDetail = "Daya Per Hour",
                                     value = state.activeEnergyImport / 1000.0,
                                     unit = "kWh",
@@ -243,10 +244,11 @@ class HomeFragment : Fragment() {
                                             val timestamp =
                                                 anomaly.readingTime.toTimestamp()?.toDateString()
                                                     ?: "Unknown Time"
-                                            println("Anomaly ID: ${anomaly.id}, Reading Time: ${anomaly.readingTime}, Converted: $timestamp")
+                                            Timber.d("Anomaly ID: ${anomaly.id}, Reading Time: ${anomaly.readingTime}, Converted: $timestamp")
 
                                             NotificationItem(
                                                 timestamp = timestamp,
+                                                location = Location.entries.find { it.location == anomaly.position }!!,
                                                 onClick = {
                                                     Navigation.findNavController(view).navigate(
                                                         HomeFragmentDirections.actionHomeFragmentToAnomalyDetailFragment(

@@ -47,7 +47,7 @@ class NotificationsAdapter(
             formattedText.append("\n")
 
             val formattedDate = notification.readingTime.toTimestamp()?.toFormattedString()
-            val positionTimeText = "${notification.position}, $formattedDate"
+            val positionTimeText = "${notification.position}, $formattedDate WIB"
             formattedText.append(positionTimeText)
 
             tvMessage.text = formattedText

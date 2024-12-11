@@ -1,6 +1,6 @@
 package com.evomo.powersmart.ui.screen.anomaly_detail
 
-import android.annotation.SuppressLint
+import  android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +23,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import com.evomo.powersmart.databinding.FragmentAnomalyDetailBinding
+import com.evomo.powersmart.ui.screen.home.Location
 import com.evomo.powersmart.ui.theme.PowerSmartTheme
 import com.evomo.powersmart.ui.theme.commonTopAppBarColor
 import com.evomo.powersmart.ui.utils.toDateString
@@ -101,18 +102,24 @@ class AnomalyDetailFragment : Fragment() {
                 viewModel.anomalyDetail.collect { anomalyDetail ->
                     anomalyDetail?.firstOrNull()?.let { item ->
                         binding.apply {
-                            tvReadingTime.text = item.readingTime.toTimestamp()
-                                ?.toDateString("dd MMM yyyy, HH:mm:ss") ?: "N/A"
+                            tvReadingTime.text = if (item.readingTime.isNotBlank()) "${
+                                item.readingTime.toTimestamp()
+                                    ?.toDateString("dd MMM yyyy, HH:mm:ss")
+                            } WIB" else "N/A"
+                            tvPosition.text =
+                                Location.entries.find { it.location == item.position }?.display
+                                    ?: "N/A"
                             tvMeterSerialNumber.text = item.meterSerialNumber.toString()
                             tvMeterType.text = item.meterType
                             tvDataType.text = item.anomalyType
-                            tvActiveEnergyImport.text = item.activeEnergyImport.toString()
-                            tvActiveEnergyExport.text = item.activeEnergyExport.toString()
-                            tvReactiveEnergyImport.text = item.reactiveEnergyImport.toString()
-                            tvReactiveEnergyExport.text = item.reactiveEnergyExport.toString()
-                            tvApparentEnergyImport.text = item.apparentEnergyImport.toString()
-                            tvApparentEnergyExport.text = item.apparentEnergyExport.toString()
-                            tvPredictedEnergy.text = item.predictedEnergy.toString()
+                            tvActiveEnergyImport.text = "${item.activeEnergyImport / 1000} kWh"
+//                            tvActiveEnergyExport.text = item.activeEnergyExport.toString()
+                            tvReactiveEnergyImport.text =
+                                "${item.reactiveEnergyImport / 1000} kWh"
+//                            tvReactiveEnergyExport.text = item.reactiveEnergyExport.toString()
+                            tvApparentEnergyImport.text = "${item.apparentEnergyImport / 1000} kWh"
+//                            tvApparentEnergyExport.text = item.apparaentEnergyExport.toString()
+//                            tvPredictedEnergy.text = item.predictedEnergy.toString()
                         }
                     }
                 }
